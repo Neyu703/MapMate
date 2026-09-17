@@ -7,6 +7,7 @@ TTL_SECONDS_BY_QUERY_TYPE = {
     "geocode": 30 * 24 * 3600,
     "poi": 7 * 24 * 3600,
     "route_walk": 30 * 24 * 3600,
+    "transit_lines": 30 * 24 * 3600,
 }
 POPULARITY_THRESHOLD = 3
 

@@ -6,11 +6,19 @@ import {
   Polyline,
   Popup,
   TileLayer,
+  Tooltip,
   ZoomControl,
   useMap,
   useMapEvents,
 } from 'react-leaflet'
-import { getCategoryMeta, type Link, type Marker as FavoriteMarker, type Poi } from '../types'
+import type { LinkRouteGeometry } from '../hooks/useLinkRoutes'
+import {
+  getCategoryMeta,
+  type Link,
+  type Marker as FavoriteMarker,
+  type Poi,
+  type TransitLine,
+} from '../types'
 import { createPinIcon, fixLeafletDefaultIcon } from './leafletIcons'
 import { MarkerPopup, type FavoriteDetails, type PlaceDetails } from './MarkerPopup'
 import styles from './MapView.module.scss'
@@ -19,7 +27,7 @@ fixLeafletDefaultIcon()
 
 const DEFAULT_CENTER: [number, number] = [51.48, 11.97]
 const DEFAULT_ZOOM = 14
-const PENDING_POINT_COLOR = '#5f6368'
+const PENDING_POINT_COLOR = '#ea4335'
 
 export interface RouteTarget {
   lat: number
@@ -31,8 +39,10 @@ interface MapViewProps {
   flyToCenter: [number, number] | null
   favorites: FavoriteMarker[]
   pois: Poi[]
+  transitLines: TransitLine[]
   links: Link[]
   showGraph: boolean
+  linkRoutes: Map<number, LinkRouteGeometry>
   pendingPoint: RouteTarget | null
   onMapClick: (lat: number, lon: number) => void
   onSaveFavorite: (point: RouteTarget, input: FavoriteDetails) => void
@@ -76,8 +86,10 @@ export function MapView({
   flyToCenter,
   favorites,
   pois,
+  transitLines,
   links,
   showGraph,
+  linkRoutes,
   pendingPoint,
   onMapClick,
   onSaveFavorite,
@@ -100,6 +112,21 @@ export function MapView({
       <ZoomControl position="bottomright" />
       <FlyToCenter center={flyToCenter} />
       <ClickHandler onMapClick={onMapClick} />
+
+      {transitLines.map((line) =>
+        line.segments.map((segment, segmentIndex) => (
+          <Polyline
+            key={`transit-line-${line.id}-${segmentIndex}`}
+            positions={segment}
+            pathOptions={{ color: line.color, weight: 4, opacity: 0.8 }}
+          >
+            <Tooltip sticky>
+              Linie {line.ref}
+              {line.name ? ` · ${line.name}` : ''}
+            </Tooltip>
+          </Polyline>
+        )),
+      )}
 
       {favorites.map((favorite) => {
         const categoryMeta = getCategoryMeta(favorite.category)
@@ -189,14 +216,20 @@ export function MapView({
           if (!markerA || !markerB) {
             return null
           }
+          const routeGeometry = linkRoutes.get(link.id)
+          const positions: [number, number][] = routeGeometry ?? [
+            [markerA.lat, markerA.lon],
+            [markerB.lat, markerB.lon],
+          ]
           return (
             <Polyline
-              key={`link-${link.id}`}
-              positions={[
-                [markerA.lat, markerA.lon],
-                [markerB.lat, markerB.lon],
-              ]}
-              pathOptions={{ color: '#1a73e8', dashArray: '6 6', weight: 3 }}
+              key={`link-${link.id}-${routeGeometry ? 'route' : 'fallback'}`}
+              positions={positions}
+              pathOptions={
+                routeGeometry
+                  ? { color: '#1a73e8', weight: 4, opacity: 0.85 }
+                  : { color: '#1a73e8', dashArray: '6 6', weight: 3 }
+              }
               eventHandlers={{
                 click: (event) => {
                   L.DomEvent.stopPropagation(event.originalEvent)

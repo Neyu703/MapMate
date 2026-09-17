@@ -82,6 +82,24 @@ export interface TransitJourney {
   legs: TransitLeg[]
 }
 
+export type TransitMode = 'bus' | 'tram' | 'bahn'
+
+export interface TransitLine {
+  id: number
+  ref: string
+  name: string | null
+  route_type: string | null
+  mode: TransitMode
+  color: string
+  segments: [number, number][][]
+}
+
+export const TRANSIT_MODE_LABELS: Record<TransitMode, string> = {
+  bus: 'Bus',
+  tram: 'Tram',
+  bahn: 'Bahn',
+}
+
 export interface CategoryMeta {
   value: string
   label: string

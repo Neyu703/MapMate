@@ -60,7 +60,15 @@ export function ProfileSwitcher() {
           title="Profil löschen"
           onClick={handleDeleteActiveProfile}
         >
-          🗑️
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       )}
 
@@ -70,27 +78,34 @@ export function ProfileSwitcher() {
         title="Neues Profil"
         onClick={() => setIsCreating((current) => !current)}
       >
-        +
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
       </button>
 
       {isCreating && (
         <form className={styles.newProfileForm} onSubmit={handleCreateProfile}>
-          <input
-            autoFocus
-            placeholder="Profilname"
-            value={newProfileName}
-            onChange={(event) => setNewProfileName(event.target.value)}
-          />
-          <input
-            className={styles.radiusInput}
-            type="number"
-            min="0"
-            placeholder="Radius km (optional)"
-            value={newProfileRadiusKm}
-            onChange={(event) => setNewProfileRadiusKm(event.target.value)}
-          />
-          <button type="submit" disabled={createProfile.isPending}>
-            Anlegen
+          <label className={styles.field}>
+            Profilname
+            <input
+              autoFocus
+              value={newProfileName}
+              onChange={(event) => setNewProfileName(event.target.value)}
+              placeholder="z.B. Halle (Saale)"
+            />
+          </label>
+          <label className={styles.field}>
+            Umkreis in km (optional)
+            <input
+              type="number"
+              min="0"
+              value={newProfileRadiusKm}
+              onChange={(event) => setNewProfileRadiusKm(event.target.value)}
+              placeholder="unbegrenzt"
+            />
+          </label>
+          <button type="submit" className={styles.submitButton} disabled={createProfile.isPending}>
+            Profil anlegen
           </button>
         </form>
       )}

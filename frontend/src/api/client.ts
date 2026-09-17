@@ -7,6 +7,7 @@ import type {
   Profile,
   ProfileInput,
   TransitJourney,
+  TransitLine,
   WalkRoute,
 } from '../types'
 
@@ -89,4 +90,7 @@ export const api = {
     requestJson<TransitJourney[]>(
       `/route/transit?from_lat=${fromLat}&from_lon=${fromLon}&to_lat=${toLat}&to_lon=${toLon}`,
     ),
+
+  searchTransitLines: (lat: number, lon: number, radiusMeters: number) =>
+    requestJson<TransitLine[]>(`/transit-lines?lat=${lat}&lon=${lon}&radius=${radiusMeters}`),
 }

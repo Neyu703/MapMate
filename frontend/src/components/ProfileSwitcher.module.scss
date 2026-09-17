@@ -5,33 +5,39 @@
     z-index: 1001;
     display: flex;
     align-items: center;
-    gap: calc(var(--spacing-unit) / 2);
+    gap: 4px;
     background: var(--color-surface);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-elevation-2);
-    padding: 6px 10px;
+    padding: 6px 8px 6px 16px;
+    height: 48px;
 }
 
 .select {
     border: none;
     background: transparent;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
     color: var(--color-text);
     max-width: 160px;
+    padding-right: 4px;
 }
 
 .iconButton {
     border: none;
     background: transparent;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
     color: var(--color-text-secondary);
+
+    svg {
+        display: block;
+    }
 
     &:hover {
         background: #f1f3f4;
@@ -40,18 +46,53 @@
 
 .newProfileForm {
     position: absolute;
-    top: 44px;
+    top: 56px;
     right: 0;
     display: flex;
     flex-direction: column;
-    gap: calc(var(--spacing-unit) / 2);
+    gap: 12px;
     background: var(--color-surface);
     border-radius: var(--radius-medium);
     box-shadow: var(--shadow-elevation-2);
-    padding: var(--spacing-unit);
-    width: 220px;
+    padding: 16px;
+    width: 240px;
 }
 
-.radiusInput {
-    width: 100%;
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+
+    input {
+        font-size: 0.9rem;
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-small);
+        padding: 8px 10px;
+
+        &:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+    }
+}
+
+.submitButton {
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 10px;
+
+    &:hover {
+        background: var(--color-accent-hover);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+    }
 }

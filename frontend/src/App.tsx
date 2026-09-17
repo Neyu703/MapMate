@@ -1,21 +1,23 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { AddressSearch } from './components/AddressSearch'
-import { FavoritesPanel } from './components/FavoritesPanel'
-import { GraphLinksPanel } from './components/GraphLinksPanel'
+import { FavoritesCard } from './components/FavoritesCard'
 import { MapView, type RouteTarget } from './components/MapView'
 import type { FavoriteDetails } from './components/MarkerPopup'
 import { PoiFilterBar } from './components/PoiFilterBar'
 import { PoiList } from './components/PoiList'
 import { RoutePanel, type RouteResult } from './components/RoutePanel'
+import { TransitLinesLegend } from './components/TransitLinesLegend'
 import { ProfileProvider } from './context/ProfileContext'
 import { useProfileContext } from './context/profileContextStore'
 import { useCreateLink, useDeleteLink, useLinks } from './hooks/useLinks'
+import { useLinkRoutes } from './hooks/useLinkRoutes'
 import { useCreateMarker, useDeleteMarker, useMarkers } from './hooks/useMarkers'
 import { usePoiSearch } from './hooks/usePois'
 import { useTransitRoute, useWalkRoute } from './hooks/useRoute'
+import { useTransitLinesSearch } from './hooks/useTransitLines'
 import { ProfileSwitcher } from './components/ProfileSwitcher'
-import type { GeocodeResult, Marker as FavoriteMarker, Poi } from './types'
+import type { GeocodeResult, Marker as FavoriteMarker, Poi, TransitLine, TransitMode } from './types'
 import styles from './App.module.scss'
 
 const queryClient = new QueryClient()
@@ -33,13 +35,20 @@ function MapMateApp() {
   const poiSearch = usePoiSearch()
   const walkRoute = useWalkRoute()
   const transitRoute = useTransitRoute()
+  const [showGraph, setShowGraph] = useState(false)
+  const linkRoutes = useLinkRoutes(links, favorites, showGraph)
 
   const [searchCenter, setSearchCenter] = useState<[number, number] | null>(null)
   const [flyToCenter, setFlyToCenter] = useState<[number, number] | null>(null)
   const [pois, setPois] = useState<Poi[]>([])
+  const [transitLines, setTransitLines] = useState<TransitLine[]>([])
+  const [enabledTransitModes, setEnabledTransitModes] = useState<Set<TransitMode>>(
+    new Set(['tram', 'bus', 'bahn']),
+  )
+  const [hiddenLineRefs, setHiddenLineRefs] = useState<Set<string>>(new Set())
   const [poiError, setPoiError] = useState<string | null>(null)
+  const transitLinesSearch = useTransitLinesSearch()
   const [pendingPoint, setPendingPoint] = useState<RouteTarget | null>(null)
-  const [showGraph, setShowGraph] = useState(false)
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null)
 
   const handleAddressSelected = (result: GeocodeResult) => {
@@ -65,6 +74,17 @@ function MapMateApp() {
       setPois(found)
     } catch {
       setPoiError('Orte konnten nicht geladen werden. Bitte gleich nochmal versuchen.')
+    }
+
+    if (categories.includes('tram_stop')) {
+      try {
+        const lines = await transitLinesSearch.mutateAsync({ lat, lon, radiusMeters })
+        setTransitLines(lines)
+      } catch {
+        setTransitLines([])
+      }
+    } else {
+      setTransitLines([])
     }
   }
 
@@ -120,8 +140,36 @@ function MapMateApp() {
   }
 
   const handleLinkClick = (markerA: FavoriteMarker, markerB: FavoriteMarker) => {
-    computeWalkRoute([markerA.lat, markerA.lon], { lat: markerB.lat, lon: markerB.lon, name: markerB.name })
+    computeTransitRoute([markerA.lat, markerA.lon], { lat: markerB.lat, lon: markerB.lon, name: markerB.name })
   }
+
+  const handleToggleTransitMode = (mode: TransitMode) => {
+    setEnabledTransitModes((current) => {
+      const next = new Set(current)
+      if (next.has(mode)) {
+        next.delete(mode)
+      } else {
+        next.add(mode)
+      }
+      return next
+    })
+  }
+
+  const handleToggleLineVisibility = (ref: string) => {
+    setHiddenLineRefs((current) => {
+      const next = new Set(current)
+      if (next.has(ref)) {
+        next.delete(ref)
+      } else {
+        next.add(ref)
+      }
+      return next
+    })
+  }
+
+  const visibleTransitLines = transitLines.filter(
+    (line) => enabledTransitModes.has(line.mode) && !hiddenLineRefs.has(line.ref),
+  )
 
   return (
     <div className={styles.appShell}>
@@ -130,8 +178,10 @@ function MapMateApp() {
           flyToCenter={flyToCenter}
           favorites={favorites}
           pois={pois}
+          transitLines={visibleTransitLines}
           links={links}
           showGraph={showGraph}
+          linkRoutes={linkRoutes}
           pendingPoint={pendingPoint}
           onMapClick={handleMapClick}
           onSaveFavorite={handleSaveFavorite}
@@ -145,6 +195,18 @@ function MapMateApp() {
         <ProfileSwitcher />
 
         <div className={styles.floatingPanel}>
+          {transitLines.length > 0 && (
+            <div className={styles.panelCard}>
+              <TransitLinesLegend
+                lines={transitLines}
+                enabledModes={enabledTransitModes}
+                hiddenLineRefs={hiddenLineRefs}
+                onToggleMode={handleToggleTransitMode}
+                onToggleLine={handleToggleLineVisibility}
+              />
+            </div>
+          )}
+
           {pois.length > 0 && (
             <div className={styles.panelCard}>
               <PoiList pois={pois} onSelect={handleSelectPoi} />
@@ -158,18 +220,15 @@ function MapMateApp() {
           )}
 
           <div className={styles.panelCard}>
-            <FavoritesPanel
-              favorites={favorites}
-              onDelete={(id) => deleteMarker.mutate(id)}
-              onSelect={(favorite) => setFlyToCenter([favorite.lat, favorite.lon])}
-            />
-            <GraphLinksPanel
+            <FavoritesCard
               favorites={favorites}
               links={links}
               showGraph={showGraph}
               onToggleShowGraph={() => setShowGraph((current) => !current)}
               onCreateLink={(markerAId, markerBId) => createLink.mutate({ markerAId, markerBId })}
               onDeleteLink={(id) => deleteLink.mutate(id)}
+              onDeleteFavorite={(id) => deleteMarker.mutate(id)}
+              onSelectFavorite={(favorite) => setFlyToCenter([favorite.lat, favorite.lon])}
             />
           </div>
         </div>

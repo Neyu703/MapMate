@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app import db as db_module
 from app.logging_setup import configure_logging, get_default_log_dir
 from app.middleware import RequestLoggingMiddleware
-from app.routers import geocode, links, markers, poi, profiles, route
+from app.routers import geocode, links, markers, poi, profiles, route, transit_lines
 
 logger = logging.getLogger("mapmate")
 
@@ -47,6 +47,7 @@ def create_app(
     app.include_router(geocode.router)
     app.include_router(poi.router)
     app.include_router(route.router)
+    app.include_router(transit_lines.router)
 
     @app.get("/api/health")
     def health() -> dict[str, str]:
