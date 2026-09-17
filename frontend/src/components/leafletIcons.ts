@@ -9,11 +9,21 @@ export function fixLeafletDefaultIcon(): void {
   L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl })
 }
 
-export function createColoredIcon(color: string): L.DivIcon {
+const PIN_SIZE = 34
+
+export function createPinIcon(color: string, glyph: string): L.DivIcon {
   return L.divIcon({
     className: '',
-    html: `<span style="display:block;width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 2px rgba(0,0,0,0.6);"></span>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: `
+      <div style="position:relative;width:${PIN_SIZE}px;height:${PIN_SIZE}px;">
+        <svg width="${PIN_SIZE}" height="${PIN_SIZE}" viewBox="0 0 34 34" style="position:absolute;top:0;left:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));">
+          <path d="M17 0C8.4 0 1.4 7 1.4 15.6c0 10.4 13.6 17.5 15.1 18.3.3.2.7.2 1 0 1.5-.8 15.1-7.9 15.1-18.3C32.6 7 25.6 0 17 0Z" fill="${color}"/>
+        </svg>
+        <span style="position:absolute;top:6px;left:0;width:100%;text-align:center;font-size:15px;line-height:1;">${glyph}</span>
+      </div>
+    `,
+    iconSize: [PIN_SIZE, PIN_SIZE],
+    iconAnchor: [PIN_SIZE / 2, PIN_SIZE - 2],
+    popupAnchor: [0, -PIN_SIZE + 4],
   })
 }

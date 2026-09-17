@@ -1,11 +1,4 @@
 .mapContainer {
-    flex: 1;
-    min-height: 0;
-}
-
-.popupActions {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--spacing-unit) / 2);
-    min-width: 160px;
+    position: absolute;
+    inset: 0;
 }

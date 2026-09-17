@@ -24,25 +24,26 @@ function formatDistance(meters: number): string {
 export function RoutePanel({ result, onClose }: RoutePanelProps) {
   return (
     <div className={styles.panel}>
-      <button type="button" className={styles.closeButton} onClick={onClose}>
-        Schließen
-      </button>
-      <h3>Route zu {result.targetName}</h3>
+      <div className={styles.header}>
+        <h3 className={styles.title}>Route zu {result.targetName}</h3>
+        <button type="button" className={styles.closeButton} onClick={onClose} title="Schließen">
+          ✕
+        </button>
+      </div>
 
-      {result.kind === 'loading' && <p>Route wird berechnet...</p>}
+      {result.kind === 'loading' && <p className={styles.summary}>Route wird berechnet...</p>}
 
-      {result.kind === 'error' && <p>{result.message}</p>}
+      {result.kind === 'error' && <p className={styles.summary}>{result.message}</p>}
 
       {result.kind === 'walk' && (
-        <p>
-          Laufweg: {formatDistance(result.route.distance_meters)},{' '}
-          {formatDuration(result.route.duration_seconds)}
+        <p className={styles.summary}>
+          🚶 {formatDistance(result.route.distance_meters)} · {formatDuration(result.route.duration_seconds)}
         </p>
       )}
 
       {result.kind === 'transit' &&
         (result.journeys.length === 0 ? (
-          <p>Keine ÖPNV-Verbindung gefunden.</p>
+          <p className={styles.summary}>Keine ÖPNV-Verbindung gefunden.</p>
         ) : (
           result.journeys.map((journey, journeyIndex) => (
             <div key={journeyIndex}>

@@ -48,12 +48,32 @@ export function ProfileSwitcher() {
         {profiles.map((profile) => (
           <option key={profile.id} value={profile.id}>
             {profile.name}
-            {profile.radius_km ? ` (${profile.radius_km} km Umkreis)` : ''}
+            {profile.radius_km ? ` (${profile.radius_km} km)` : ''}
           </option>
         ))}
       </select>
 
-      {isCreating ? (
+      {activeProfile && !activeProfile.is_default && (
+        <button
+          type="button"
+          className={styles.iconButton}
+          title="Profil löschen"
+          onClick={handleDeleteActiveProfile}
+        >
+          🗑️
+        </button>
+      )}
+
+      <button
+        type="button"
+        className={styles.iconButton}
+        title="Neues Profil"
+        onClick={() => setIsCreating((current) => !current)}
+      >
+        +
+      </button>
+
+      {isCreating && (
         <form className={styles.newProfileForm} onSubmit={handleCreateProfile}>
           <input
             autoFocus
@@ -65,27 +85,14 @@ export function ProfileSwitcher() {
             className={styles.radiusInput}
             type="number"
             min="0"
-            placeholder="Radius km"
+            placeholder="Radius km (optional)"
             value={newProfileRadiusKm}
             onChange={(event) => setNewProfileRadiusKm(event.target.value)}
           />
           <button type="submit" disabled={createProfile.isPending}>
             Anlegen
           </button>
-          <button type="button" onClick={() => setIsCreating(false)}>
-            Abbrechen
-          </button>
         </form>
-      ) : (
-        <button type="button" onClick={() => setIsCreating(true)}>
-          + Neues Profil
-        </button>
-      )}
-
-      {activeProfile && !activeProfile.is_default && (
-        <button type="button" onClick={handleDeleteActiveProfile}>
-          Profil löschen
-        </button>
       )}
     </div>
   )

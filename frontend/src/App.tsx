@@ -37,6 +37,7 @@ function MapMateApp() {
   const [searchCenter, setSearchCenter] = useState<[number, number] | null>(null)
   const [flyToCenter, setFlyToCenter] = useState<[number, number] | null>(null)
   const [pois, setPois] = useState<Poi[]>([])
+  const [poiError, setPoiError] = useState<string | null>(null)
   const [pendingPoint, setPendingPoint] = useState<RouteTarget | null>(null)
   const [showGraph, setShowGraph] = useState(false)
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null)
@@ -58,8 +59,13 @@ function MapMateApp() {
       return
     }
     const [lat, lon] = searchCenter
-    const found = await poiSearch.mutateAsync({ lat, lon, radiusMeters, categories, profileId })
-    setPois(found)
+    try {
+      const found = await poiSearch.mutateAsync({ lat, lon, radiusMeters, categories, profileId })
+      setPoiError(null)
+      setPois(found)
+    } catch {
+      setPoiError('Orte konnten nicht geladen werden. Bitte gleich nochmal versuchen.')
+    }
   }
 
   const handleSelectPoi = (poi: Poi) => {
@@ -119,27 +125,7 @@ function MapMateApp() {
 
   return (
     <div className={styles.appShell}>
-      <ProfileSwitcher />
-      <div className={styles.body}>
-        <aside className={styles.sidebar}>
-          <AddressSearch onAddressSelected={handleAddressSelected} />
-          <PoiFilterBar disabled={!searchCenter} onSearch={handlePoiSearch} />
-          <PoiList pois={pois} onSelect={handleSelectPoi} />
-          <FavoritesPanel
-            favorites={favorites}
-            onDelete={(id) => deleteMarker.mutate(id)}
-            onSelect={(favorite) => setFlyToCenter([favorite.lat, favorite.lon])}
-          />
-          <GraphLinksPanel
-            favorites={favorites}
-            links={links}
-            showGraph={showGraph}
-            onToggleShowGraph={() => setShowGraph((current) => !current)}
-            onCreateLink={(markerAId, markerBId) => createLink.mutate({ markerAId, markerBId })}
-            onDeleteLink={(id) => deleteLink.mutate(id)}
-          />
-          {routeResult && <RoutePanel result={routeResult} onClose={() => setRouteResult(null)} />}
-        </aside>
+      <div className={styles.mapArea}>
         <MapView
           flyToCenter={flyToCenter}
           favorites={favorites}
@@ -153,6 +139,40 @@ function MapMateApp() {
           onRouteTransit={handleRouteTransit}
           onLinkClick={handleLinkClick}
         />
+
+        <AddressSearch onAddressSelected={handleAddressSelected} />
+        <PoiFilterBar disabled={!searchCenter} error={poiError} onSearch={handlePoiSearch} />
+        <ProfileSwitcher />
+
+        <div className={styles.floatingPanel}>
+          {pois.length > 0 && (
+            <div className={styles.panelCard}>
+              <PoiList pois={pois} onSelect={handleSelectPoi} />
+            </div>
+          )}
+
+          {routeResult && (
+            <div className={styles.panelCard}>
+              <RoutePanel result={routeResult} onClose={() => setRouteResult(null)} />
+            </div>
+          )}
+
+          <div className={styles.panelCard}>
+            <FavoritesPanel
+              favorites={favorites}
+              onDelete={(id) => deleteMarker.mutate(id)}
+              onSelect={(favorite) => setFlyToCenter([favorite.lat, favorite.lon])}
+            />
+            <GraphLinksPanel
+              favorites={favorites}
+              links={links}
+              showGraph={showGraph}
+              onToggleShowGraph={() => setShowGraph((current) => !current)}
+              onCreateLink={(markerAId, markerBId) => createLink.mutate({ markerAId, markerBId })}
+              onDeleteLink={(id) => deleteLink.mutate(id)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -49,6 +49,18 @@ def category_for_tags(tags: dict) -> Optional[str]:
     return None
 
 
+def build_address(tags: dict) -> Optional[str]:
+    street = tags.get("addr:street")
+    house_number = tags.get("addr:housenumber")
+    postcode = tags.get("addr:postcode")
+    city = tags.get("addr:city")
+
+    street_line = " ".join(part for part in (street, house_number) if part)
+    city_line = " ".join(part for part in (postcode, city) if part)
+    address = ", ".join(part for part in (street_line, city_line) if part)
+    return address or None
+
+
 def parse_overpass_response(raw_response: dict, origin_lat: float, origin_lon: float) -> list[dict]:
     pois = []
     for element in raw_response.get("elements", []):
@@ -64,6 +76,10 @@ def parse_overpass_response(raw_response: dict, origin_lat: float, origin_lon: f
                 "lat": lat,
                 "lon": lon,
                 "distance_meters": round(haversine_distance_meters(origin_lat, origin_lon, lat, lon)),
+                "opening_hours": tags.get("opening_hours"),
+                "phone": tags.get("contact:phone") or tags.get("phone"),
+                "website": tags.get("contact:website") or tags.get("website"),
+                "address": build_address(tags),
             }
         )
     pois.sort(key=lambda poi: poi["distance_meters"])

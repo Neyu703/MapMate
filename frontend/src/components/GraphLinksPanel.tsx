@@ -37,9 +37,9 @@ export function GraphLinksPanel({
 
   return (
     <div className={styles.panel}>
-      <label>
+      <label className={styles.toggleLabel}>
         <input type="checkbox" checked={showGraph} onChange={onToggleShowGraph} />
-        Graph-Modus (Verknüpfungen auf der Karte anzeigen)
+        Graph-Modus
       </label>
 
       {links.map((link) => (
@@ -47,7 +47,7 @@ export function GraphLinksPanel({
           <span>
             {favoriteName(favorites, link.marker_a_id)} ↔ {favoriteName(favorites, link.marker_b_id)}
           </span>
-          <button type="button" onClick={() => onDeleteLink(link.id)}>
+          <button type="button" className={styles.unlinkButton} onClick={() => onDeleteLink(link.id)}>
             Trennen
           </button>
         </div>

@@ -1,9 +1,22 @@
 .panel {
     display: flex;
     flex-direction: column;
-    gap: calc(var(--spacing-unit) / 2);
-    padding: var(--spacing-unit);
-    overflow-y: auto;
+}
+
+.heading {
+    margin: 0;
+    padding: 12px 16px 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}
+
+.empty {
+    padding: 8px 16px 16px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
 }
 
 .item {
@@ -11,6 +24,11 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-unit);
+    padding: 8px 16px;
+
+    &:hover {
+        background: #f8f9fa;
+    }
 }
 
 .colorDot {
@@ -18,7 +36,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    margin-right: 6px;
+    margin-right: 8px;
     background-color: var(--dot-color, currentColor);
 }
 
@@ -29,4 +47,26 @@
     padding: 0;
     font: inherit;
     text-align: left;
+    color: var(--color-text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.removeButton {
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+
+    &:hover {
+        background: #f1f3f4;
+        color: var(--color-danger);
+    }
 }

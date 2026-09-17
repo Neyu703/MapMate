@@ -57,6 +57,10 @@ export interface Poi {
   lat: number
   lon: number
   distance_meters: number
+  opening_hours: string | null
+  phone: string | null
+  website: string | null
+  address: string | null
 }
 
 export interface WalkRoute {
@@ -78,12 +82,30 @@ export interface TransitJourney {
   legs: TransitLeg[]
 }
 
-export const POI_CATEGORIES = [
-  { value: 'supermarket', label: 'Supermarkt' },
-  { value: 'tram_stop', label: 'Tram-/Bus-Haltestelle' },
-  { value: 'gym', label: 'Fitnessstudio' },
-  { value: 'station', label: 'Bahnhof' },
-  { value: 'pharmacy', label: 'Apotheke' },
-  { value: 'doctor', label: 'Arzt' },
-  { value: 'restaurant', label: 'Restaurant' },
-] as const
+export interface CategoryMeta {
+  value: string
+  label: string
+  icon: string
+  color: string
+}
+
+export const POI_CATEGORIES: CategoryMeta[] = [
+  { value: 'supermarket', label: 'Supermarkt', icon: '🛒', color: '#1a73e8' },
+  { value: 'tram_stop', label: 'Tram-/Bus-Haltestelle', icon: '🚊', color: '#188038' },
+  { value: 'gym', label: 'Fitnessstudio', icon: '🏋️', color: '#e37400' },
+  { value: 'station', label: 'Bahnhof', icon: '🚉', color: '#8430ce' },
+  { value: 'pharmacy', label: 'Apotheke', icon: '💊', color: '#d93025' },
+  { value: 'doctor', label: 'Arzt', icon: '🩺', color: '#12b5cb' },
+  { value: 'restaurant', label: 'Restaurant', icon: '🍽️', color: '#b06000' },
+]
+
+const DEFAULT_CATEGORY_META: CategoryMeta = {
+  value: 'other',
+  label: 'Ort',
+  icon: '📍',
+  color: '#5f6368',
+}
+
+export function getCategoryMeta(category: string | null): CategoryMeta {
+  return POI_CATEGORIES.find((meta) => meta.value === category) ?? DEFAULT_CATEGORY_META
+}
