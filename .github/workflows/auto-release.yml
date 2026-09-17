@@ -14,11 +14,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_PAT }}
 
       - name: Tag and release each new commit
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.event.after }}
         run: |
