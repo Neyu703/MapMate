@@ -57,6 +57,11 @@ the frontend, bundles it with the backend into `MapMate.exe` via PyInstaller, an
 versioned build with no manual release step. Grab the latest one from the
 [Releases page](../../releases).
 
+`auto-release.yml` needs a `RELEASE_PAT` repository secret (a token with `repo` +
+`workflow` scope) rather than the default `GITHUB_TOKEN`: GitHub does not fire new
+workflow runs for events created by the default token, so a release created that way
+would never trigger `build-exe-release.yml`.
+
 ## Data & Logs
 
 Application data lives outside the install folder, so updates never touch it:
