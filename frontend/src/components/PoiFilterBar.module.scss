@@ -1,0 +1,30 @@
+.bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(var(--spacing-unit) / 2);
+    padding: var(--spacing-unit);
+    border-bottom: 1px solid #ddd;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+    background: var(--color-background);
+    cursor: pointer;
+    font-size: 0.85rem;
+
+    &.active {
+        background: var(--color-accent);
+        color: white;
+        border-color: var(--color-accent);
+    }
+}
+
+.radiusLabel {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) / 4);
+    font-size: 0.85rem;
+}

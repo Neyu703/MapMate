@@ -1,0 +1,19 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) / 2);
+    padding: var(--spacing-unit);
+    border-top: 1px solid #ddd;
+}
+
+.linkRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+
+.newLinkForm {
+    display: flex;
+    gap: calc(var(--spacing-unit) / 2);
+}

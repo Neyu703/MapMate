@@ -4,14 +4,22 @@ import httpx
 
 BASE_URL = "https://router.project-osrm.org/route/v1/foot"
 
+# router.project-osrm.org's public demo only hosts car-speed profile data, even under
+# the /foot/ path: its "duration" for a walking route comes out at car-like speeds
+# (verified live: 970m route reported as 201s, i.e. ~17 km/h). The routed distance/path
+# is still correct (it does prefer footpaths), so duration is recomputed from distance
+# using an average walking speed instead of trusting OSRM's number.
+AVERAGE_WALKING_SPEED_METERS_PER_SECOND = 5000 / 3600
+
 
 def parse_route_response(raw_response: dict) -> dict:
     if raw_response.get("code") != "Ok" or not raw_response.get("routes"):
         raise ValueError(f"OSRM returned no route: {raw_response.get('code')}")
     route = raw_response["routes"][0]
+    distance_meters = route["distance"]
     return {
-        "distance_meters": route["distance"],
-        "duration_seconds": route["duration"],
+        "distance_meters": distance_meters,
+        "duration_seconds": distance_meters / AVERAGE_WALKING_SPEED_METERS_PER_SECOND,
         "geometry": route["geometry"]["coordinates"],
     }
 

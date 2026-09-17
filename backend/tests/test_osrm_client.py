@@ -4,7 +4,7 @@ import httpx
 from app.clients import osrm
 
 
-def test_parse_route_response_extracts_distance_duration_geometry():
+def test_parse_route_response_extracts_distance_and_geometry():
     raw = {
         "code": "Ok",
         "routes": [
@@ -16,11 +16,19 @@ def test_parse_route_response_extracts_distance_duration_geometry():
         ],
     }
     parsed = osrm.parse_route_response(raw)
-    assert parsed == {
-        "distance_meters": 850.5,
-        "duration_seconds": 620.0,
-        "geometry": [[11.97, 51.48], [11.98, 51.49]],
+    assert parsed["distance_meters"] == 850.5
+    assert parsed["geometry"] == [[11.97, 51.48], [11.98, 51.49]]
+
+
+def test_parse_route_response_recomputes_duration_from_distance():
+    # OSRM's public demo reports car-speed durations even for /foot/ routes (see
+    # osrm.py), so duration must come from distance / walking speed, not route["duration"].
+    raw = {
+        "code": "Ok",
+        "routes": [{"distance": 1000.0, "duration": 60.0, "geometry": {"coordinates": []}}],
     }
+    parsed = osrm.parse_route_response(raw)
+    assert parsed["duration_seconds"] == pytest.approx(720.0)
 
 
 def test_parse_route_response_raises_when_no_route_found():

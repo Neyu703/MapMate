@@ -4,6 +4,7 @@ from typing import Optional
 import httpx
 
 BASE_URL = "https://overpass-api.de/api/interpreter"
+USER_AGENT = "MapMate/0.1 (personal desktop app, local use only)"
 
 CATEGORY_TAGS = {
     "supermarket": ("shop", "supermarket"),
@@ -80,7 +81,9 @@ def search_pois(
     owns_client = client is None
     http_client = client or httpx.Client()
     try:
-        response = http_client.post(BASE_URL, data={"data": query}, timeout=30)
+        response = http_client.post(
+            BASE_URL, data={"data": query}, headers={"User-Agent": USER_AGENT}, timeout=30
+        )
         response.raise_for_status()
         return parse_overpass_response(response.json(), lat, lon)
     finally:

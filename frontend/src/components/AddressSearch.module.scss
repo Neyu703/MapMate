@@ -1,0 +1,32 @@
+.wrapper {
+    position: relative;
+    padding: var(--spacing-unit);
+    max-width: 320px;
+}
+
+.input {
+    width: 100%;
+}
+
+.results {
+    position: absolute;
+    left: var(--spacing-unit);
+    right: var(--spacing-unit);
+    background: var(--color-background);
+    border: 1px solid #ccc;
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 1000;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.resultItem {
+    padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
+    cursor: pointer;
+
+    &:hover {
+        background: #f0f4ff;
+    }
+}

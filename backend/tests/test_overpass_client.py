@@ -57,6 +57,7 @@ def test_search_pois_posts_query_and_parses_response():
 
     def handler(request: httpx.Request) -> httpx.Response:
         captured["body"] = request.content.decode()
+        captured["user_agent"] = request.headers.get("user-agent")
         return httpx.Response(
             200,
             json={"elements": [{"id": 1, "tags": {"shop": "supermarket"}, "lat": 51.48, "lon": 11.97}]},
@@ -67,6 +68,21 @@ def test_search_pois_posts_query_and_parses_response():
 
     assert "supermarket" in captured["body"]
     assert result[0]["id"] == 1
+
+
+def test_search_pois_sends_identifying_user_agent():
+    # Overpass API's front-end proxy rejects requests without a recognizable
+    # User-Agent with a 406, so this header is required, not just polite.
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["user_agent"] = request.headers.get("user-agent")
+        return httpx.Response(200, json={"elements": []})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    overpass.search_pois(51.48, 11.97, 1000, ["supermarket"], client=client)
+
+    assert captured["user_agent"] == overpass.USER_AGENT
 
 
 def test_search_pois_creates_and_closes_its_own_client_by_default(monkeypatch):

@@ -1,0 +1,14 @@
+.panel {
+    padding: var(--spacing-unit);
+    border-top: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+.leg {
+    padding: calc(var(--spacing-unit) / 2) 0;
+    border-bottom: 1px solid #eee;
+}
+
+.closeButton {
+    float: right;
+}
