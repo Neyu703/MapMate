@@ -103,6 +103,24 @@ def test_parse_overpass_response_leaves_optional_fields_none_when_missing():
     assert poi["phone"] is None
     assert poi["website"] is None
     assert poi["address"] is None
+    assert poi["platform"] is None
+
+
+def test_parse_overpass_response_includes_platform_from_local_ref():
+    # Real Halle OSM data: each "Marktplatz" platform is a separate node distinguished
+    # only by local_ref (A/B/C/D) -- this is what lets the UI show "Steig A" etc.
+    raw = {
+        "elements": [
+            {
+                "id": 1,
+                "tags": {"railway": "tram_stop", "name": "Marktplatz", "local_ref": "A"},
+                "lat": 51.48,
+                "lon": 11.97,
+            }
+        ]
+    }
+    poi = overpass.parse_overpass_response(raw, 51.48, 11.97)[0]
+    assert poi["platform"] == "A"
 
 
 def test_build_address_combines_available_parts():

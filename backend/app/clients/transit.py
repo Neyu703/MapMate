@@ -18,6 +18,8 @@ def parse_journeys_response(raw_response: dict) -> list[dict]:
                     "arrival": leg.get("arrival"),
                     "origin_name": leg.get("origin", {}).get("name"),
                     "destination_name": leg.get("destination", {}).get("name"),
+                    "departure_platform": leg.get("departurePlatform"),
+                    "arrival_platform": leg.get("arrivalPlatform"),
                 }
             )
         journeys.append({"legs": legs})

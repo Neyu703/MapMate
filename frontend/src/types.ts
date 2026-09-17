@@ -61,6 +61,7 @@ export interface Poi {
   phone: string | null
   website: string | null
   address: string | null
+  platform: string | null
 }
 
 export interface WalkRoute {
@@ -76,6 +77,8 @@ export interface TransitLeg {
   arrival: string | null
   origin_name: string | null
   destination_name: string | null
+  departure_platform: string | null
+  arrival_platform: string | null
 }
 
 export interface TransitJourney {

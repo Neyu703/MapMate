@@ -80,6 +80,7 @@ def parse_overpass_response(raw_response: dict, origin_lat: float, origin_lon: f
                 "phone": tags.get("contact:phone") or tags.get("phone"),
                 "website": tags.get("contact:website") or tags.get("website"),
                 "address": build_address(tags),
+                "platform": tags.get("local_ref"),
             }
         )
     pois.sort(key=lambda poi: poi["distance_meters"])

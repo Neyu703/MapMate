@@ -15,6 +15,7 @@ export interface PlaceDetails {
   phone?: string | null
   website?: string | null
   address?: string | null
+  platform?: string | null
 }
 
 interface MarkerPopupProps {
@@ -63,6 +64,12 @@ export function MarkerPopup({
         </div>
 
         <dl className={styles.details}>
+          {place.platform && (
+            <div className={styles.detailRow}>
+              <dt>🚏</dt>
+              <dd>Steig {place.platform}</dd>
+            </div>
+          )}
           {place.openingHours && (
             <div className={styles.detailRow}>
               <dt>🕒</dt>

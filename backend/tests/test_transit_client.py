@@ -22,6 +22,8 @@ def test_parse_journeys_response_extracts_legs():
                         "arrival": "2026-01-01T10:15:00+01:00",
                         "origin": {"name": "Haltestelle X"},
                         "destination": {"name": "Ziel"},
+                        "departurePlatform": "A",
+                        "arrivalPlatform": "2",
                     },
                 ]
             }
@@ -31,12 +33,36 @@ def test_parse_journeys_response_extracts_legs():
     assert len(parsed) == 1
     legs = parsed[0]["legs"]
     assert legs[0]["mode"] == "walking"
+    assert legs[0]["departure_platform"] is None
     assert legs[1]["mode"] == "tram"
     assert legs[1]["line_name"] == "Tram 4"
+    assert legs[1]["departure_platform"] == "A"
+    assert legs[1]["arrival_platform"] == "2"
 
 
 def test_parse_journeys_response_handles_no_journeys():
     assert transit.parse_journeys_response({"journeys": []}) == []
+
+
+def test_parse_journeys_response_defaults_missing_platforms_to_none():
+    raw = {
+        "journeys": [
+            {
+                "legs": [
+                    {
+                        "walking": True,
+                        "departure": "2026-01-01T10:00:00+01:00",
+                        "arrival": "2026-01-01T10:05:00+01:00",
+                        "origin": {"name": "Start"},
+                        "destination": {"name": "Ziel"},
+                    }
+                ]
+            }
+        ]
+    }
+    leg = transit.parse_journeys_response(raw)[0]["legs"][0]
+    assert leg["departure_platform"] is None
+    assert leg["arrival_platform"] is None
 
 
 def test_get_journeys_sends_coordinates_as_query_params():

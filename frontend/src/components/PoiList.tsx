@@ -33,17 +33,29 @@ function closestDistance(entries: Poi[]): number {
   return Math.min(...entries.map((entry) => entry.distance_meters))
 }
 
-function PoiRow({ poi, onSelect }: { poi: Poi; onSelect: (poi: Poi) => void }) {
+function PoiRow({
+  poi,
+  label,
+  onSelect,
+}: {
+  poi: Poi
+  label?: string
+  onSelect: (poi: Poi) => void
+}) {
   const categoryMeta = getCategoryMeta(poi.category)
   return (
     <li className={styles.item} onClick={() => onSelect(poi)}>
       <span className={styles.icon} aria-hidden="true">
         {categoryMeta.icon}
       </span>
-      <span className={styles.name}>{poi.name}</span>
+      <span className={styles.name}>{label ?? poi.name}</span>
       <span className={styles.distance}>{formatDistance(poi.distance_meters)}</span>
     </li>
   )
+}
+
+function platformLabel(poi: Poi): string {
+  return poi.platform ? `Steig ${poi.platform}` : poi.name
 }
 
 function PoiGroupRow({
@@ -82,7 +94,7 @@ function PoiGroupRow({
             .slice()
             .sort((a, b) => a.distance_meters - b.distance_meters)
             .map((entry) => (
-              <PoiRow key={entry.id} poi={entry} onSelect={onSelect} />
+              <PoiRow key={entry.id} poi={entry} label={platformLabel(entry)} onSelect={onSelect} />
             ))}
         </ul>
       )}

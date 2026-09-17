@@ -197,6 +197,7 @@ export function MapView({
           phone: poi.phone,
           website: poi.website,
           address: poi.address,
+          platform: poi.platform,
         }
         return (
           <Marker
