@@ -1,0 +1,45 @@
+name: Build and attach MapMate.exe
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install backend + packaging dependencies
+        working-directory: backend
+        run: pip install -r requirements-desktop.txt
+
+      - name: Build MapMate.exe with PyInstaller
+        working-directory: backend
+        run: pyinstaller ../desktop/build.spec
+
+      - name: Zip the distributable
+        working-directory: backend/dist
+        run: Compress-Archive -Path MapMate -DestinationPath MapMate-win64.zip
+
+      - name: Upload zip to the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "backend/dist/MapMate-win64.zip"
