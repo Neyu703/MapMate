@@ -3,6 +3,7 @@ import L from 'leaflet'
 import {
   MapContainer,
   Marker,
+  Polygon,
   Polyline,
   Popup,
   TileLayer,
@@ -12,6 +13,7 @@ import {
   useMapEvents,
 } from 'react-leaflet'
 import type { LinkRouteGeometry } from '../hooks/useLinkRoutes'
+import { buildCircleLatLngs, WORLD_COVERING_RING } from '../lib/geo'
 import {
   getCategoryMeta,
   type Link,
@@ -35,11 +37,18 @@ export interface RouteTarget {
   name: string
 }
 
+export interface ProfileRadiusMask {
+  centerLat: number
+  centerLon: number
+  radiusKm: number
+}
+
 interface MapViewProps {
   flyToCenter: [number, number] | null
   favorites: FavoriteMarker[]
   pois: Poi[]
   transitLines: TransitLine[]
+  radiusMask: ProfileRadiusMask | null
   links: Link[]
   showGraph: boolean
   linkRoutes: Map<number, LinkRouteGeometry>
@@ -87,6 +96,7 @@ export function MapView({
   favorites,
   pois,
   transitLines,
+  radiusMask,
   links,
   showGraph,
   linkRoutes,
@@ -112,6 +122,23 @@ export function MapView({
       <ZoomControl position="bottomright" />
       <FlyToCenter center={flyToCenter} />
       <ClickHandler onMapClick={onMapClick} />
+
+      {radiusMask && (
+        <Polygon
+          positions={[
+            WORLD_COVERING_RING,
+            buildCircleLatLngs(radiusMask.centerLat, radiusMask.centerLon, radiusMask.radiusKm),
+          ]}
+          interactive={false}
+          pathOptions={{
+            stroke: true,
+            color: '#5f6368',
+            weight: 1.5,
+            fillColor: '#202124',
+            fillOpacity: 0.35,
+          }}
+        />
+      )}
 
       {transitLines.map((line) =>
         line.segments.map((segment, segmentIndex) => (

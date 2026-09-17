@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { AddressSearch } from './components/AddressSearch'
 import { FavoritesCard } from './components/FavoritesCard'
-import { MapView, type RouteTarget } from './components/MapView'
+import { MapView, type ProfileRadiusMask, type RouteTarget } from './components/MapView'
 import type { FavoriteDetails } from './components/MarkerPopup'
 import { PoiFilterBar } from './components/PoiFilterBar'
 import { PoiList } from './components/PoiList'
@@ -171,6 +171,15 @@ function MapMateApp() {
     (line) => enabledTransitModes.has(line.mode) && !hiddenLineRefs.has(line.ref),
   )
 
+  const radiusMask: ProfileRadiusMask | null =
+    activeProfile?.center_lat != null && activeProfile?.center_lon != null && activeProfile?.radius_km != null
+      ? {
+          centerLat: activeProfile.center_lat,
+          centerLon: activeProfile.center_lon,
+          radiusKm: activeProfile.radius_km,
+        }
+      : null
+
   return (
     <div className={styles.appShell}>
       <div className={styles.mapArea}>
@@ -179,6 +188,7 @@ function MapMateApp() {
           favorites={favorites}
           pois={pois}
           transitLines={visibleTransitLines}
+          radiusMask={radiusMask}
           links={links}
           showGraph={showGraph}
           linkRoutes={linkRoutes}

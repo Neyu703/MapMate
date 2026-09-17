@@ -46,8 +46,16 @@ function PoiRow({ poi, onSelect }: { poi: Poi; onSelect: (poi: Poi) => void }) {
   )
 }
 
-function PoiGroupRow({ group, onSelect }: { group: PoiGroup; onSelect: (poi: Poi) => void }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+function PoiGroupRow({
+  group,
+  startExpanded,
+  onSelect,
+}: {
+  group: PoiGroup
+  startExpanded: boolean
+  onSelect: (poi: Poi) => void
+}) {
+  const [isExpanded, setIsExpanded] = useState(startExpanded)
   const categoryMeta = getCategoryMeta(group.entries[0]?.category ?? null)
 
   if (group.entries.length === 1) {
@@ -83,19 +91,43 @@ function PoiGroupRow({ group, onSelect }: { group: PoiGroup; onSelect: (poi: Poi
 }
 
 export function PoiList({ pois, onSelect }: PoiListProps) {
+  const [searchTerm, setSearchTerm] = useState('')
+
   if (pois.length === 0) {
     return null
   }
 
-  const groups = groupByName(pois).sort(
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+  const filteredPois = normalizedSearchTerm
+    ? pois.filter((poi) => poi.name.toLowerCase().includes(normalizedSearchTerm))
+    : pois
+
+  const groups = groupByName(filteredPois).sort(
     (a, b) => closestDistance(a.entries) - closestDistance(b.entries),
   )
 
   return (
-    <ul className={styles.list}>
-      {groups.map((group) => (
-        <PoiGroupRow key={group.name} group={group} onSelect={onSelect} />
-      ))}
-    </ul>
+    <div>
+      <input
+        className={styles.searchInput}
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.target.value)}
+        placeholder={`${pois.length} Ergebnisse durchsuchen...`}
+      />
+      {groups.length === 0 ? (
+        <div className={styles.noMatches}>Keine Treffer für „{searchTerm}“.</div>
+      ) : (
+        <ul className={styles.list}>
+          {groups.map((group) => (
+            <PoiGroupRow
+              key={`${group.name}-${normalizedSearchTerm}`}
+              group={group}
+              startExpanded={normalizedSearchTerm.length > 0}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
